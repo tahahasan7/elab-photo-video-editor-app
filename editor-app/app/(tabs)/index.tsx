@@ -12,8 +12,9 @@ import CircleButton from "@/components/CircleButton";
 import EmojiList from "@/components/EmojiList";
 import EmojiPicker from "@/components/EmojiPicker";
 import EmojiSticker from "@/components/EmojiSticker";
+import FilterControls from "@/components/FilterControls";
 import IconButton from "@/components/IconButton";
-import ImageViewer from "@/components/ImageViewer";
+import ImageViewer, { FilterType } from "@/components/ImageViewer";
 
 const PlaceholderImage = require("@/assets/images/background-image.png");
 
@@ -26,6 +27,7 @@ export default function Index() {
   const [pickedEmoji, setPickedEmoji] = useState<ImageSource | undefined>(
     undefined
   );
+  const [currentFilter, setCurrentFilter] = useState<FilterType>("normal");
   const [status, requestPermission] = MediaLibrary.usePermissions();
   const imageRef = useRef<View>(null);
 
@@ -95,70 +97,75 @@ export default function Index() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View style={styles.imageContainer}>
-        <View ref={imageRef} collapsable={false}>
-          <ImageViewer
-            imgSource={PlaceholderImage}
-            selectedImage={selectedImage}
-          />
-          {pickedEmoji && (
-            <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
-          )}
-        </View>
-      </View>
-      {showAppOptions ? (
-        <View style={styles.optionsContainer}>
-          <View style={styles.optionsRow}>
-            <IconButton icon="refresh" label="Reset" onPress={onReset} />
-            <CircleButton onPress={onAddSticker} />
-            <IconButton
-              icon="save-alt"
-              label="Save"
-              onPress={onSaveImageAsync}
+      <View>
+        <View style={styles.imageContainer}>
+          <View ref={imageRef} collapsable={false}>
+            <ImageViewer
+              imgSource={PlaceholderImage}
+              selectedImage={selectedImage}
+              currentFilter={currentFilter}
             />
+            {pickedEmoji && (
+              <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
+            )}
           </View>
         </View>
-      ) : (
-        <View style={styles.footerContainer}>
-          <Button
-            theme="primary"
-            label="Choose a photo"
-            onPress={pickImageAsync}
+
+        {/* Filter controls outside of the captured area */}
+        <View style={styles.buttonContainer}>
+          <FilterControls
+            imgSource={PlaceholderImage}
+            selectedImage={selectedImage}
+            currentFilter={currentFilter}
+            onFilterChange={setCurrentFilter}
           />
-          <Button
-            label="Use this photo"
-            onPress={() => setShowAppOptions(true)}
-          />
+
+          {showAppOptions ? (
+            <View style={styles.optionsContainer}>
+              <View style={styles.optionsRow}>
+                <IconButton icon="refresh" label="Reset" onPress={onReset} />
+                <CircleButton onPress={onAddSticker} />
+                <IconButton
+                  icon="save-alt"
+                  label="Save"
+                  onPress={onSaveImageAsync}
+                />
+              </View>
+            </View>
+          ) : (
+            <View style={styles.footerContainer}>
+              <Button
+                theme="primary"
+                label="Choose a photo"
+                onPress={pickImageAsync}
+              />
+              <Button
+                label="Use this photo"
+                onPress={() => setShowAppOptions(true)}
+              />
+            </View>
+          )}
+          <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
+            <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+          </EmojiPicker>
         </View>
-      )}
-      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
-        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
-      </EmojiPicker>
+      </View>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#25292e",
     alignItems: "center",
-  },
-  imageContainer: {
-    flex: 1,
-  },
-  footerContainer: {
-    flex: 1 / 3,
-    alignItems: "center",
-    position: "absolute",
-    bottom: 0,
-  },
-  optionsContainer: {
-    position: "absolute",
-    bottom: 40,
   },
   optionsRow: {
     alignItems: "center",
     flexDirection: "row",
+    justifyContent: "center",
+  },
+  buttonContainer: {
+    flex: 1,
+    justifyContent: "space-around",
   },
 });
