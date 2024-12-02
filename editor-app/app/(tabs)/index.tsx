@@ -150,10 +150,12 @@ const styles = StyleSheet.create({
   footerContainer: {
     flex: 1 / 3,
     alignItems: "center",
+    position: "absolute",
+    bottom: 0,
   },
   optionsContainer: {
     position: "absolute",
-    bottom: 80,
+    bottom: 40,
   },
   optionsRow: {
     alignItems: "center",
