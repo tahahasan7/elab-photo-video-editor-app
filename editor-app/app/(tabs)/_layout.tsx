@@ -22,7 +22,7 @@ export default function TabLayout() {
           title: "Edit image",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "home-sharp" : "home-outline"}
+              name={focused ? "image" : "image-outline"}
               color={color}
               size={24}
             />
@@ -32,12 +32,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="about"
         options={{
-          title: "About",
+          title: "Edit Video",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={
-                focused ? "information-circle" : "information-circle-outline"
-              }
+              name={focused ? "videocam" : "videocam"}
               color={color}
               size={24}
             />

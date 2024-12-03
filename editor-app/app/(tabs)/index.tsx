@@ -2,6 +2,7 @@ import domtoimage from "dom-to-image";
 import { type ImageSource } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
 import { useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -52,6 +53,8 @@ export default function Index() {
 
   const onReset = () => {
     setShowAppOptions(false);
+    setCurrentFilter("normal");
+    setPickedEmoji(undefined);
   };
 
   const onAddSticker = () => {
@@ -63,22 +66,29 @@ export default function Index() {
   };
 
   const onSaveImageAsync = async () => {
-    if (Platform.OS !== "web") {
-      try {
-        const localUri = await captureRef(imageRef, {
-          height: 440,
-          quality: 1,
-        });
+    try {
+      const localUri = await captureRef(imageRef, {
+        height: 440,
+        quality: 1,
+      });
 
-        await MediaLibrary.saveToLibraryAsync(localUri);
-        if (localUri) {
-          alert("Saved!");
-        }
-      } catch (e) {
-        console.log(e);
+      await MediaLibrary.saveToLibraryAsync(localUri);
+      if (localUri) {
+        alert("Saved!");
       }
-    } else {
-      try {
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const onExportImageAsync = async () => {
+    try {
+      const localUri = await captureRef(imageRef, {
+        height: 440,
+        quality: 1,
+      });
+
+      if (Platform.OS === "web") {
         const dataUrl = await domtoimage.toJpeg(imageRef.current, {
           quality: 0.95,
           width: 320,
@@ -86,12 +96,14 @@ export default function Index() {
         });
 
         let link = document.createElement("a");
-        link.download = "sticker-smash.jpeg";
+        link.download = "sticker-smash-export.jpeg";
         link.href = dataUrl;
         link.click();
-      } catch (e) {
-        console.log(e);
+      } else {
+        await Sharing.shareAsync(localUri);
       }
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -111,7 +123,6 @@ export default function Index() {
           </View>
         </View>
 
-        {/* Filter controls outside of the captured area */}
         <View style={styles.buttonContainer}>
           <FilterControls
             imgSource={PlaceholderImage}
@@ -129,6 +140,11 @@ export default function Index() {
                   icon="save-alt"
                   label="Save"
                   onPress={onSaveImageAsync}
+                />
+                <IconButton
+                  icon="share"
+                  label="Export"
+                  onPress={onExportImageAsync}
                 />
               </View>
             </View>
@@ -159,13 +175,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#25292e",
     alignItems: "center",
   },
+  imageContainer: {},
+  buttonContainer: {
+    flex: 1,
+    justifyContent: "space-around",
+  },
+  optionsContainer: {},
   optionsRow: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
   },
-  buttonContainer: {
-    flex: 1,
-    justifyContent: "space-around",
-  },
+  footerContainer: {},
 });
